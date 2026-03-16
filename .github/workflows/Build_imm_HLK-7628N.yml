@@ -1,4 +1,4 @@
-name: Build_imm_XG_040G_MD
+name: Build_imm_HLK-7628N
 
 on:
   repository_dispatch:
@@ -16,11 +16,11 @@ on:
         type: boolean
 
 env:
-  CONFIG_FILE: 'config/040.config'
-  REPO_URL: https://github.com/xuxin1955/immortalwrt
-  REPO_BRANCH: master
+  CONFIG_FILE: 'config/hlk7628n.config'
+  REPO_URL: https://github.com/immortalwrt/immortalwrt
+  REPO_BRANCH: openwrt-25.12
   FEEDS_CONF: feeds.conf.default
-  DIY_P4_SH: diy-part4.sh
+  DIY_P3_SH: diy-part3.sh
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
@@ -112,9 +112,9 @@ jobs:
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $DIY_P4_SH
+        chmod +x $DIY_P3_SH
         cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P4_SH
+        $GITHUB_WORKSPACE/$DIY_P3_SH
 
     - name: Update & Install feeds
       working-directory: ./openwrt
@@ -130,13 +130,11 @@ jobs:
         cp -fv "${CONFIG_FILE}" openwrt/.config
         cd openwrt && make defconfig
         
-        
     - name: SSH 调试有效时间60分钟! 连接后输入q 输入exit即可退出，自动继续后续编译流程
       uses: mxschmitt/action-tmate@master
       if: ${{ inputs.ssh || contains(github.event.action, 'ssh') }}
       with:
         timeout-minutes: 60
-
       
       
     - name: Download package
@@ -198,16 +196,16 @@ jobs:
       run: |
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         cat <<EOF > release.txt
-        🚀 OpenWrt firmware for XG_040G_MD
+        🚀 OpenWrt firmware for HILINK HLK-7628N WIFI路由模块
         ----------------------
-        设备: XG-040G-MD
+        设备: HILINK HLK-7628N WIFI路由模块
         时间: $(date +"%Y-%m-%d %H:%M")
         内核版本: 6.12.X
         源码仓库: $REPO_URL
         分支: $REPO_BRANCH
         EOF
         echo "status=success" >> $GITHUB_OUTPUT
-
+        
     - name: Generate file list
       if: env.UPLOAD_RELEASE == 'true' && steps.organize.outputs.status == 'success'
       run: |
@@ -231,6 +229,10 @@ jobs:
         allowUpdates: true
         draft: false
         prerelease: false
+
+
+
+
 
     - name: Delete old workflow runs via GitHub API
       if: always()
@@ -260,3 +262,6 @@ jobs:
               "https://api.github.com/repos/${{ github.repository }}/actions/runs/$run_id"
           done
         fi
+
+
+
